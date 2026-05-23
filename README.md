@@ -1,125 +1,110 @@
-# Corewar
+# Corewar 👾
 
-Corewar is a Hive Helsinki final project based on the School 42 Corewar
-assignment. The project implements both sides of the game toolchain:
+**A Hive Helsinki Final Project (Algorithm Branch)**
 
-- an assembler that parses Corewar champion source files and emits `.cor`
-  bytecode
-- a virtual machine that loads compiled champions, validates their headers and
-  executable code, and runs the arena simulation
-- a sample champion, `JoeTheChamp.s`, used as a simple working player
+Corewar is a competitive programming game based on the [**School 42 Corewar project**](docs/corewar.en.pdf). Small "champions" (programs written in a custom assembly language) battle for control of a virtual memory arena. This repository contains a full implementation of the toolchain, including a bytecode assembler and a multi-process virtual machine.
 
-The code follows the 42 Norm style constraints used at Hive, which shaped the
-project structure and implementation style.
+This project was built following the strict [**School 42 Norm**](docs/en.norm.pdf) coding standards, emphasizing memory efficiency, robust error handling, and modular C architecture.
 
-## Repository Layout
+---
 
-```text
-.
-├── srcs/asm/                assembler implementation
-├── srcs/virtualmachine/     virtual machine implementation
-├── includes/                shared project headers
-├── libft/                   custom C utility library and ft_printf
-├── asm_tests/               assembler fixtures and comparison scripts
-├── test_files_vm_team/      VM-focused champion fixtures
-├── JoeTheChamp.s            sample champion source
-├── Makefile
-└── README.md
-```
+## 🏗️ Project Architecture
 
-The source tree intentionally stays close to the original Hive project layout.
-The test directories contain historical fixtures from development rather than a
-modern portable test suite.
+The system is divided into three primary components:
 
-## Project Context
+### 1. The Assembler (`asm`) 🛠️
+Translates human-readable `.s` assembly files into binary `.cor` bytecode.
+- **Lexical Analysis:** Robust parsing of instructions, registers, and labels.
+- **Bytecode Generation:** Handles argument coding bytes (ACB), direct/indirect values, and big-endian conversion.
+- **Validation:** Ensures champions adhere to memory limits and structural constraints.
 
-Corewar is a programming game where small assembly-like programs compete inside a
-fixed-size memory arena. Each champion executes instructions such as `live`,
-`ld`, `st`, `add`, `fork`, and `zjmp`; the virtual machine advances the game by
-cycles, schedules processes, tracks live calls, and eliminates processes that do
-not report alive within the required cycle window.
+### 2. The Virtual Machine (`corewar`) 🖥️
+The execution environment where champions compete in a circular 4096-byte arena.
+- **Multi-Process Scheduling:** Manages thousands of concurrent processes with independent program counters.
+- **Instruction Cycle Timing:** Each of the 16 opcodes has a specific cycle cost, requiring precise timing management.
+- **Memory Isolation:** Strict validation of memory access to prevent simulation crashes.
+- **Liveness Tracking:** A "Cycle to Die" mechanism that periodically eliminates processes and players who fail to report liveness.
 
-This repository was built as a team project:
+### 3. The Champion (`Honky Joe`) 🥊
+A sample player provided to demonstrate the system's capabilities.
+- While not a world-class fighter, Joe serves as a reference for a valid, working champion.
 
-- Pavel Arkharov and Marius worked on the assembler
-- Ian Gaplichnik and Miro Tissari worked on the virtual machine
+---
 
-## Build
+## 🚀 Getting Started
 
-```sh
+### Prerequisites
+- A C compiler (GCC/Clang)
+- `make`
+
+### Installation
+```bash
+git clone https://github.com/Sickology101/Corewar.git
+cd Corewar
 make
 ```
+This will produce two executables: `asm` and `corewar`.
 
-This builds two executables in the repository root:
+### Usage
 
-- `./asm`
-- `./corewar`
-
-Cleanup targets are also available:
-
-```sh
-make clean
-make fclean
-make re
-```
-
-## Assembler Usage
-
-Compile a champion source file:
-
-```sh
+**Step 1: Compile your champion**
+```bash
 ./asm JoeTheChamp.s
 ```
 
-The assembler writes a `.cor` file next to the input source:
-
-```text
-Writing output program to JoeTheChamp.cor
-File converted successfully
+**Step 2: Start the battle**
+```bash
+./corewar -dump 1500 champion1.cor champion2.cor
 ```
 
-## Virtual Machine Usage
+**Available Flags:**
+- `-dump <nbr>`: Dumps memory to stdout after `<nbr>` cycles and exits.
+- `-n <id>`: Assigns a specific ID to the following player.
+- `-v <level>`: (If implemented) Verbosity levels for simulation tracing.
 
-Run one to four compiled champions:
+---
 
-```sh
-./corewar JoeTheChamp.cor
-```
+## 🥊 The Legend of Honky Joe
 
-Useful flags:
+<img align="right" width="200" alt="JoeTheChamp" src="https://user-images.githubusercontent.com/90178358/219705436-d2724a41-c64e-4725-a2aa-780cd7087f5d.jpeg#right">
 
-```sh
-./corewar -dump 100 JoeTheChamp.cor
-./corewar -n 1 JoeTheChamp.cor
-```
+The Champion didn't need to be a grandmaster for this project—just a fellow who works and stays alive for a while. After building the Assembler and VM, we realized the moves were already familiar, so we created **Honky Joe**.
 
-- `-dump <cycle>` prints the arena memory at the selected cycle and exits
-- `-n <id>` assigns a specific player id to the following champion
+Honky Joe was born in Louisiana and Hungary, and the doctors knew from the beginning he was going to be "honky." Lacking traditional hand-eye coordination, Joe often slaps other champions by accident. Because Joe is such a nice fellow, he frequently lets others beat his ass.
 
-## Implementation Notes
+He might not be the greatest fighter, but he is undeniably the **honkiest**.
 
-The assembler performs lexical and structural validation, stores labels and
-instructions, resolves label references, generates argument coding bytes where
-required, and writes the Corewar binary header and instruction bytes.
+---
 
-The virtual machine validates each champion before loading it into the arena.
-Validation includes the magic header, champion name and comment fields, declared
-code size, null separators, and executable bytecode size. The game loop manages
-process scheduling, instruction timing, player liveness, cycle-to-die checks,
-and arena memory updates.
+## 🛠️ Implementation Details
 
-## Tests And Fixtures
+### Validation Engine
+The VM performs rigorous validation on every `.cor` file:
+- **Magic Header:** Verification of the Corewar magic number.
+- **Metadata:** Parsing and size-checking of champion names and comments.
+- **Null Separators:** Ensuring proper binary alignment.
+- **Bytecode Integrity:** Validating executable code size against the header declaration.
 
-The repository includes historical assembler and VM fixtures used during the
-Hive project:
+### The Game Loop
+The simulation follows a strict cycle-based clock:
+1. **Fetch:** Read next opcode for each process.
+2. **Wait:** Pause execution based on the opcode's cycle cost.
+3. **Execute:** Perform the operation (e.g., `fork`, `live`, `zjmp`, `st`) if the argument types are valid.
+4. **Prune:** Every `CYCLE_TO_DIE` cycles, the VM checks for liveness and decreases the check interval if necessary.
 
-- `asm_tests/` contains source files, invalid-input cases, comparison scripts,
-  and expected compiled bytecode
-- `test_files_vm_team/` contains VM-focused champion fixtures
+---
 
-Some helper scripts compare this assembler against the original 42 reference
-assembler used during development.
+## 👥 The Team
 
-## License
+This project was a collaborative effort by:
+- **Assembler Team:** [Pavel Arkharov](https://github.com/pavel-arkharov) & [Marius](https://github.com/Sickology101)
+- **VM Team:** [Ian Gaplichnik](https://github.com/IanGaplichnik) & [Miro Tissari](https://github.com/MiroTissari)
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+---
+
+## 📜 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+*So long, and thanks for all the fish!* 🐬📚
