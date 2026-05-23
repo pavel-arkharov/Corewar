@@ -1,113 +1,125 @@
-# Corewar 👾
-The final project of the Algorithm-branch at Hive Helsinki.  
+# Corewar
 
-The project consists of three parts:  
-- [Virtual Machine](#Virtual-Machine)   
-  * The Game itself, a platform for the champions to battle. 
-- [Assembler](#Assembler)  
-  * Takes the champion .s file written (mostly) in assembler language  
-  and interprets it as a bytecode for the Virtual Machine to understand.  
-- [Champion](#Champion)  
-  * a player in the corewar-game, has a name, comment and ASM commands.  
-  
-The whole project had to be done according to School 42's [Norminette](https://github.com/gdamion/Norminette/blob/master/norme.en.pdf); a set of rules aimed to improve the way we code by imposing certain style restrictions.  
+Corewar is a Hive Helsinki final project based on the School 42 Corewar
+assignment. The project implements both sides of the game toolchain:
 
-We allocated [Pavel](https://github.com/pavel-arkharov) and [Marius](https://github.com/Sickology101) to work on the Assembler, and [Ian](https://github.com/IanGaplichnik) and [Miro](https://github.com/MiroTissari) to work on the Virtual Machine.  
-  
-  
-### Usage
-  
-Copy the repository git clone it on your terminal:  
- ```git clone https://github.com/Sickology101/Corewar.git```  
-At the root of the repository, type ```make``` to compile both programs.  
-  
-  
-<details><summary>Using Assembler</summary>
-<p>
+- an assembler that parses Corewar champion source files and emits `.cor`
+  bytecode
+- a virtual machine that loads compiled champions, validates their headers and
+  executable code, and runs the arena simulation
+- a sample champion, `JoeTheChamp.s`, used as a simple working player
 
-To be released soon.
+The code follows the 42 Norm style constraints used at Hive, which shaped the
+project structure and implementation style.
 
-</p>
-</details>
-  
-  
-<details><summary>Using Virtual Machine</summary>
-<p>
+## Repository Layout
 
-To be released soon.
+```text
+.
+├── srcs/asm/                assembler implementation
+├── srcs/virtualmachine/     virtual machine implementation
+├── includes/                shared project headers
+├── libft/                   custom C utility library and ft_printf
+├── asm_tests/               assembler fixtures and comparison scripts
+├── test_files_vm_team/      VM-focused champion fixtures
+├── JoeTheChamp.s            sample champion source
+├── Makefile
+└── README.md
+```
 
-</p>
-</details>
-  
-  
-## Assembler
+The source tree intentionally stays close to the original Hive project layout.
+The test directories contain historical fixtures from development rather than a
+modern portable test suite.
 
-<details><summary>a section</summary>
-<p>
+## Project Context
 
-Executing 
- ```
- ./asm exampleFilename.s
- ```
- will output the exampleFilename.cor file in the same folder as original. 
+Corewar is a programming game where small assembly-like programs compete inside a
+fixed-size memory arena. Each champion executes instructions such as `live`,
+`ld`, `st`, `add`, `fork`, and `zjmp`; the virtual machine advances the game by
+cycles, schedules processes, tracks live calls, and eliminates processes that do
+not report alive within the required cycle window.
 
-</p>
-</details>
-  
-  
-  
-  
-## Virtual Machine
-<details><summary>Verifying and Validating</summary>
-<p>
-  
-The Virtual Machine starts with parsing and verifying the input.  
-While doing so, we also check if there are flags present, and save that information for the printing part.  
-There can be 1 - 4 players, the extension has to be _.cor_, and supported flags are -n [nbr] & -dump [nbr].
-  
-  
-Then we read the files one by one, perform various validations and save the data into _s_player_ -struct.  
-The validation includes checkin the _Magic Header_, _champion name_, _champion comment_, the _size of the executable code_, and the _executable code_ itself. There are _Null separators_ in between, and the sizes of _Magic Header_, _name_ and _comment_ are prefixed.  
-  
-| <img style="float:right" width="400" alt="honkyJoe cor" src="https://user-images.githubusercontent.com/90178358/219679483-5511009a-6850-4fe5-a1d2-645d6ccf3ad0.jpeg#right"> | <img width="398" alt="honky_Joe2 cor" src="https://user-images.githubusercontent.com/90178358/219703368-2426bf77-042e-47d7-bf87-07aa369d55cc.jpeg#right">
-|:--:|:--:|
-|<em>at the beginning of the .cor -file</em>|<em>at the end of the file</em>|
-</p>
-</details>
-  
-  
-<details><summary>Game loop</summary>
-<p>
-  
-To be released soon
+This repository was built as a team project:
 
-</p>
-</details>
- 
-  
+- Pavel Arkharov and Marius worked on the assembler
+- Ian Gaplichnik and Miro Tissari worked on the virtual machine
 
+## Build
 
-  
-## Champion
-  
-<img align="right" width="200" alt="JoeTheChamp" src="https://user-images.githubusercontent.com/90178358/219705436-d2724a41-c64e-4725-a2aa-780cd7087f5d.jpeg#right">
+```sh
+make
+```
 
-The Champion didn't need to be a good one for this project, just one that works and stays alive for a while.  
-  
-After completing the Assembler and Virtual Machine it wasn't too hard to make the champion,  
-as the moves were familiar.
-  
-We didn't feel the need to make a good fighter, but an easygoing fellow who goes by the name Honky Joe.  
+This builds two executables in the repository root:
 
-Honky Joe was born in Louisiana and Hungary, and the doctors knew from the beginning he was going to be honky.  
-Without any hand-eye coordination, Joe often slaps people by accident.  
-But because Joe is such a nice fellow, he let's the other champions beat his a**, 
-hence Honky-Joe is not the greatest of fighters.  
-  
-But he is the honkiest.
-  
-## License 
-This project is licensed under the MIT License. See the LICENSE file for more information.
-  
-  
-  
+- `./asm`
+- `./corewar`
+
+Cleanup targets are also available:
+
+```sh
+make clean
+make fclean
+make re
+```
+
+## Assembler Usage
+
+Compile a champion source file:
+
+```sh
+./asm JoeTheChamp.s
+```
+
+The assembler writes a `.cor` file next to the input source:
+
+```text
+Writing output program to JoeTheChamp.cor
+File converted successfully
+```
+
+## Virtual Machine Usage
+
+Run one to four compiled champions:
+
+```sh
+./corewar JoeTheChamp.cor
+```
+
+Useful flags:
+
+```sh
+./corewar -dump 100 JoeTheChamp.cor
+./corewar -n 1 JoeTheChamp.cor
+```
+
+- `-dump <cycle>` prints the arena memory at the selected cycle and exits
+- `-n <id>` assigns a specific player id to the following champion
+
+## Implementation Notes
+
+The assembler performs lexical and structural validation, stores labels and
+instructions, resolves label references, generates argument coding bytes where
+required, and writes the Corewar binary header and instruction bytes.
+
+The virtual machine validates each champion before loading it into the arena.
+Validation includes the magic header, champion name and comment fields, declared
+code size, null separators, and executable bytecode size. The game loop manages
+process scheduling, instruction timing, player liveness, cycle-to-die checks,
+and arena memory updates.
+
+## Tests And Fixtures
+
+The repository includes historical assembler and VM fixtures used during the
+Hive project:
+
+- `asm_tests/` contains source files, invalid-input cases, comparison scripts,
+  and expected compiled bytecode
+- `test_files_vm_team/` contains VM-focused champion fixtures
+
+Some helper scripts compare this assembler against the original 42 reference
+assembler used during development.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.

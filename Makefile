@@ -100,8 +100,10 @@ LIBFT			= $(addprefix $(LIBFT_DIR), $(LIBFT_LIB))
 
 all : $(VM_NAME) $(ASM_NAME)
 
-$(VM_NAME): $(VM_OBJ) $(VM_INC)
+$(LIBFT):
 	@make -C $(LIBFT_DIR)
+
+$(VM_NAME): $(LIBFT) $(VM_OBJ) $(VM_INC)
 	@echo "$(CYELLOW)Compiling the executable: $(CPURPLEB)$(VM_NAME)$(CEND)"
 	@$(CC) -o $(VM_NAME) $(FLAGS) $(VM_OBJ) -I libft/includes/ -I ./includes/ -L. $(LIBFT)
 	@echo "$(CGREEN)OK$(CEND)"
@@ -144,4 +146,4 @@ fclean : clean
 	@rm -rf $(ASM_NAME)
 	@echo "$(CGREEN)OK$(CEND)"
 
-re : fclean all clean all
+re : fclean all

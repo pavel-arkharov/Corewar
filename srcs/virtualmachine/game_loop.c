@@ -72,10 +72,8 @@ void	check_processes(t_data *const data)
 */
 void	perform_check(t_data *const data, t_counter *counter)
 {
-	int			i;
 	t_player	*player;
 
-	i = 0;
 	counter->checks_total++;
 	check_processes(data);
 	if (counter->lives_this_period >= NBR_LIVE

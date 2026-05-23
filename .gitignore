@@ -1,0 +1,15 @@
+asm
+corewar
+asm_obj/
+vm_obj/
+libft/*.a
+libft/libft/*.a
+libft/**/*.o
+*.o
+*.cor
+*.dSYM/
+.DS_Store
+hex1.txt
+hex2.txt
+diff*.txt
+leaks*.txt

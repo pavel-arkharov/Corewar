@@ -25,14 +25,17 @@ void	exit_usage(int flag)
 	else if (flag == 5)
 		ft_printf("No name or comment in file\n");
 	else if (flag == 6)
-		ft_printf("File converted succesfuly\n");
+		ft_printf("File converted successfully\n");
 	else if (flag == 7)
 		ft_printf("Label not found\n");
 	else if (flag == 8)
 		ft_printf("No newline at the end\n");
 	else
 		ft_printf("Usage : ./assembler [filename.s]\n");
-	exit(1);
+	if (flag == 6)
+		exit(0);
+	else
+		exit(1);
 }
 
 bool	check_newline(char *filename)
